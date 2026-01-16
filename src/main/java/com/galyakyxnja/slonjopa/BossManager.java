@@ -20,7 +20,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 public class BossManager {
     
     public static void spawnBoss(Location location) {
-        // Спавним зомби-жителя (не горит на солнце)
+        // Спавним зомби-жителя
         ZombieVillager boss = (ZombieVillager) location.getWorld().spawnEntity(location, EntityType.ZOMBIE_VILLAGER);
         
         // Настройка босса из config.yml
@@ -28,7 +28,7 @@ public class BossManager {
         double attackDamage = Main.getInstance().getConfig().getDouble("boss.attack-damage", 2.0);
         String bossName = Main.getInstance().getConfig().getString("boss.name", "Хозяин Жопы");
         
-        // Устанавливаем точное здоровье через атрибут (работает для зомби)
+        // Устанавливаем точное здоровье
         boss.getAttribute(Attribute.MAX_HEALTH).setBaseValue(maxHealth);
         boss.setHealth(maxHealth);
         
@@ -39,7 +39,7 @@ public class BossManager {
         boss.customName(Component.text("§c§l" + bossName));
         boss.setCustomNameVisible(true);
         
-        // Настраиваем внешний вид как свинью
+        // Настраиваем внешний вид
         customizeAppearance(boss);
         
         // Делаем взрослым и неисчезающим
@@ -50,7 +50,7 @@ public class BossManager {
         // Эффекты
         boss.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, Integer.MAX_VALUE, 1));
         boss.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, Integer.MAX_VALUE, 1));
-        boss.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0)); // Немного быстрее
+        boss.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0));
         
         // Отключаем превращение на солнце
         boss.setConversionTime(-1);
@@ -60,30 +60,30 @@ public class BossManager {
     }
     
     private static void customizeAppearance(ZombieVillager boss) {
-        // 1. Одеваем в розовую кожаную броню (цвет свиньи)
+        // Одеваем в розовую кожаную броню
         EntityEquipment equipment = boss.getEquipment();
         if (equipment != null) {
             // Розовый шлем
             ItemStack helmet = new ItemStack(Material.LEATHER_HELMET);
             LeatherArmorMeta helmetMeta = (LeatherArmorMeta) helmet.getItemMeta();
-            helmetMeta.setColor(Color.fromRGB(255, 192, 203)); // Розовый
+            helmetMeta.setColor(Color.fromRGB(255, 192, 203));
             helmet.setItemMeta(helmetMeta);
             equipment.setHelmet(helmet);
             
             // Розовый нагрудник
             ItemStack chestplate = new ItemStack(Material.LEATHER_CHESTPLATE);
             LeatherArmorMeta chestplateMeta = (LeatherArmorMeta) chestplate.getItemMeta();
-            chestplateMeta.setColor(Color.fromRGB(255, 182, 193)); // Светло-розовый
+            chestplateMeta.setColor(Color.fromRGB(255, 182, 193));
             chestplate.setItemMeta(chestplateMeta);
             equipment.setChestplate(chestplate);
             
-            // Делаем броню неснимаемой
+            // Броня неснимаемая
             equipment.setHelmetDropChance(0.0f);
             equipment.setChestplateDropChance(0.0f);
         }
         
-        // 2. Делаем его "толстым" (больше хитбокс)
-        boss.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, Integer.MAX_VALUE, 1)); // Медленнее
+        // Замедляем для "толстого" вида
+        boss.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, Integer.MAX_VALUE, 1));
     }
     
     private static void broadcastBossSpawn(Location location, String bossName) {
@@ -104,6 +104,44 @@ public class BossManager {
                 player.sendMessage(message3);
             }
         });
+    }
+    
+    public static void checkBerserkMode(LivingEntity boss) {
+        if (!(boss instanceof ZombieVillager)) return;
+        
+        Component customName = boss.customName();
+        if (customName == null || !customName.toString().contains("Хозяин Жопы")) {
+            return;
+        }
+        
+        double maxHealth = boss.getAttribute(Attribute.MAX_HEALTH).getValue();
+        double currentHealth = boss.getHealth();
+        double healthPercent = (currentHealth / maxHealth) * 100;
+        
+        // Если здоровье <= 50% и ещё нет эффекта Strength
+        if (healthPercent <= 50.0 && !boss.hasPotionEffect(PotionEffectType.STRENGTH)) {
+            // Усиливаем урон (эффект Strength I = +130% урона)
+            boss.addPotionEffect(new PotionEffect(
+                PotionEffectType.STRENGTH, 
+                Integer.MAX_VALUE,
+                1
+            ));
+            
+            // Сообщение игрокам поблизости
+            Component message = Component.text("§4§l⚠ ХОЗЯИН ЖОПЫ ВПАЛ В ЯРОСТЬ! УРОН УВЕЛИЧЕН!");
+            boss.getWorld().getNearbyEntities(boss.getLocation(), 30, 30, 30).forEach(entity -> {
+                if (entity instanceof Player) {
+                    ((Player) entity).sendMessage(message);
+                }
+            });
+            
+            // Простые частицы
+            boss.getWorld().spawnParticle(
+                org.bukkit.Particle.LAVA,
+                boss.getLocation().add(0, 1, 0),
+                10
+            );
+        }
     }
     
     public static void onBossDeath(Location location, String killerName) {

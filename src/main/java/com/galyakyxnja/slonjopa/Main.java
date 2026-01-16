@@ -24,7 +24,8 @@ public void onEnable() {
     // Регистрация слушателей событий
     getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
     getServer().getPluginManager().registerEvents(new BossDeathListener(), this);
-    getServer().getPluginManager().registerEvents(new BossDamageListener(), this); // ← НОВЫЙ СЛУШАТЕЛЬ
+    getServer().getPluginManager().registerEvents(new BossDamageListener(), this);
+    //getServer().getPluginManager().registerEvents(new BossHealthListener(), this); // ← НОВЫЙ СЛУШАТЕЛЬ
 
     // Сохранение конфига по умолчанию
     saveDefaultConfig();

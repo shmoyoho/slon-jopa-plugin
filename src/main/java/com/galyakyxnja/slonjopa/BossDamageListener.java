@@ -48,15 +48,24 @@ public class BossDamageListener implements Listener {
             damager.damage(reflectedDamage, boss);
             
             // Сообщение игроку (раз в 5 секунд, чтобы не спамить)
-            if (System.currentTimeMillis() % 5000 < 50) { // Примерно раз в 5 сек
+            if (System.currentTimeMillis() % 5000 < 50) {
                 damager.sendMessage(Component.text("§cБосс отражает " + 
                     (int)(reflectionPercent * 100) + "% вашего урона!"));
             }
         }
         
-        // Уменьшаем получаемый боссом урон (опционально)
+        // Уменьшаем получаемый боссом урон
         double damageReduction = 0.2; // 20% снижение урона
-        event.setDamage(originalDamage * (1 - damageReduction));
+        double finalDamage = originalDamage * (1 - damageReduction);
+        
+        // УМНОЖАЕМ УРОН БОССА В РЕЖИМЕ БЕРСЕРКА (когда у него ≤50% HP)
+        double damageMultiplier = 1.0;
+        if (boss.hasPotionEffect(org.bukkit.potion.PotionEffectType.STRENGTH)) {
+            damageMultiplier = 2.0; // ×2 урон в режиме берсерка
+        }
+        
+        // Устанавливаем итоговый урон
+        event.setDamage(finalDamage * damageMultiplier);
     }
     
     @EventHandler
@@ -71,12 +80,12 @@ public class BossDamageListener implements Listener {
             return;
         }
         
-        // Защита от падения (настраиваемо)
+        // Защита от падения
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
             event.setDamage(event.getDamage() * 0.5); // Урон от падения уменьшен на 50%
         }
         
-        // Защита от огня (уже есть эффект FIRE_RESISTANCE, но на всякий случай)
+        // Защита от огня
         if (event.getCause() == EntityDamageEvent.DamageCause.FIRE ||
             event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK ||
             event.getCause() == EntityDamageEvent.DamageCause.LAVA) {

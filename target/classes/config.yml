@@ -44,3 +44,12 @@ damage-protection:
 admin:
   max-parts-per-give: 64  # Максимальное количество частей за раз
   notify-on-give: true    # Уведомлять игрока при выдаче
+
+# Режим берсерка (усиление при 50% HP)
+berserk-mode:
+  enabled: true
+  health-threshold: 50  # Процент HP для активации
+  damage-multiplier: 2.0  # Во сколько раз увеличивается урон
+  strength-effect-level: 1  # Уровень эффекта Strength (1 = +130%)
+  message: "§4§l⚠ ХОЗЯИН ЖОПЫ ВПАЛ В ЯРОСТЬ! УРОН УВЕЛИЧЕН!"
+  particles: true
