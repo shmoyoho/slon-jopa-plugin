@@ -1,0 +1,14 @@
+﻿# Скомпилированные файлы
+target/
+*.jar
+*.class
+bin/
+
+# Файлы IDE
+.vscode/
+*.iml
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+*.log
