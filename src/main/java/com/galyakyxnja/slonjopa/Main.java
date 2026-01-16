@@ -12,22 +12,18 @@ public void onEnable() {
     instance = this;
     getLogger().info("§aПлагин 'Жопа Слона' включен! Создатель: GalyaKyxnya");
 
-    // Инициализация LuckPerms
     if (!LuckPermsIntegration.setupLuckPerms()) {
         getLogger().warning("Интеграция с LuckPerms отключена.");
     }
 
-    // Регистрация команд
     this.getCommand("jopa").setExecutor(new JopaCommand());
     this.getCommand("jopas").setExecutor(new JopaAdminCommand());
 
-    // Регистрация слушателей событий
     getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
     getServer().getPluginManager().registerEvents(new BossDeathListener(), this);
     getServer().getPluginManager().registerEvents(new BossDamageListener(), this);
-    //getServer().getPluginManager().registerEvents(new BossHealthListener(), this); // ← НОВЫЙ СЛУШАТЕЛЬ
+    getServer().getPluginManager().registerEvents(new BossHealthListener(), this);
 
-    // Сохранение конфига по умолчанию
     saveDefaultConfig();
 }
 
