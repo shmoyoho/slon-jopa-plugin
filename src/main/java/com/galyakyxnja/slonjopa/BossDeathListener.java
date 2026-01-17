@@ -27,6 +27,9 @@ public class BossDeathListener implements Listener {
             return; // Это не наш босс
         }
         
+        // Деактивируем ИИ босса
+        BossAI.deactivateBossAI(zombie);
+        
         // Получаем игрока-убийцу
         Player killer = zombie.getKiller();
         if (killer == null) return;
@@ -34,11 +37,9 @@ public class BossDeathListener implements Listener {
         // 1. Выдаём опыт (20 уровней)
         killer.giveExpLevels(20);
         
-        // 2. Отправляем кастомное сообщение в чат
-        Component message = Component.text("@DfvGhy Я " + killer.getName() + "Убил твоего Слона!")
-            .color(TextColor.color(255, 170, 0)); // Золотой цвет §6
-        
-        zombie.getWorld().sendMessage(message);
+        // 2. Отправляем кастомное сообщение ОТ ИМЕНИ ИГРОКА в чат
+        String chatMessage = "@DfvGhy Я " + killer.getName() + " Убил твоего Слона!";
+        killer.chat(chatMessage);
         
         // 3. Очищаем стандартный дроп зомби
         event.getDrops().clear();
